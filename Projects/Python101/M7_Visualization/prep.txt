@@ -1,0 +1,16 @@
+1 Understand context 
+	> who
+	> what
+	> why
+
+2 Propoer Graph
+	> what is suited to display that info
+
+3 Delutering
+
+4 Design
+	highlight only what tells a story ( at most 10% of the graph )
+		> color, size, form
+
+5 Storytelling
+	> everything should lead to the conclusion you want to show
