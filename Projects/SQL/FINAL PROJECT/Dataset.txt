@@ -1,0 +1,439 @@
+1. Addresses
+
+INSERT INTO Addresses (address_id, street, city, state, zip_code, country) VALUES
+(1, '123 Main St', 'New York', 'NY', '10001', 'USA'),
+(2, '456 Elm St', 'Los Angeles', 'CA', '90001', 'USA'),
+(3, '789 Oak St', 'Chicago', 'IL', '60601', 'USA'),
+(4, '101 Pine St', 'Houston', 'TX', '77001', 'USA'),
+(5, '202 Maple St', 'Phoenix', 'AZ', '85001', 'USA'),
+(6, '303 Birch St', 'Philadelphia', 'PA', '19019', 'USA'),
+(7, '404 Cedar St', 'San Antonio', 'TX', '78201', 'USA'),
+(8, '505 Walnut St', 'San Diego', 'CA', '92101', 'USA'),
+(9, '606 Cherry St', 'Dallas', 'TX', '75201', 'USA'),
+(10, '707 Spruce St', 'San Jose', 'CA', '95101', 'USA'),
+(11, '808 Palm St', 'Austin', 'TX', '73301', 'USA'),
+(12, '909 Willow St', 'Jacksonville', 'FL', '32099', 'USA'),
+(13, '1010 Ash St', 'San Francisco', 'CA', '94101', 'USA'),
+(14, '1111 Birch St', 'Indianapolis', 'IN', '46201', 'USA'),
+(15, '1212 Cedar St', 'Columbus', 'OH', '43085', 'USA'),
+(16, '1313 Elm St', 'Fort Worth', 'TX', '76101', 'USA'),
+(17, '1414 Oak St', 'Charlotte', 'NC', '28201', 'USA'),
+(18, '1515 Pine St', 'Seattle', 'WA', '98101', 'USA'),
+(19, '1616 Maple St', 'Denver', 'CO', '80201', 'USA'),
+(20, '1717 Walnut St', 'Washington', 'DC', '20001', 'USA'),
+(21, '1818 Cherry St', 'Boston', 'MA', '02101', 'USA'),
+(22, '1919 Spruce St', 'Nashville', 'TN', '37201', 'USA'),
+(23, '2020 Palm St', 'Baltimore', 'MD', '21201', 'USA'),
+(24, '2121 Willow St', 'Oklahoma City', 'OK', '73101', 'USA'),
+(25, '2222 Ash St', 'Louisville', 'KY', '40201', 'USA'),
+(26, '2323 Birch St', 'Portland', 'OR', '97201', 'USA'),
+(27, '2424 Cedar St', 'Las Vegas', 'NV', '89101', 'USA'),
+(28, '2525 Elm St', 'Milwaukee', 'WI', '53201', 'USA'),
+(29, '2626 Oak St', 'Albuquerque', 'NM', '87101', 'USA'),
+(30, '2727 Pine St', 'Tucson', 'AZ', '85701', 'USA'),
+(31, '2828 Maple St', 'Fresno', 'CA', '93650', 'USA'),
+(32, '2929 Walnut St', 'Sacramento', 'CA', '94203', 'USA'),
+(33, '3030 Cherry St', 'Kansas City', 'MO', '64101', 'USA'),
+(34, '3131 Spruce St', 'Atlanta', 'GA', '30301', 'USA'),
+(35, '3232 Palm St', 'Miami', 'FL', '33101', 'USA'),
+(36, '3333 Willow St', 'Raleigh', 'NC', '27601', 'USA'),
+(37, '3434 Ash St', 'Omaha', 'NE', '68101', 'USA'),
+(38, '3535 Birch St', 'Minneapolis', 'MN', '55401', 'USA'),
+(39, '3636 Cedar St', 'Tampa', 'FL', '33601', 'USA'),
+(40, '3737 Elm St', 'New Orleans', 'LA', '70112', 'USA');
+
+2. Students
+
+INSERT INTO Students (student_id, first_name, last_name, email, date_of_birth, address_id) VALUES
+(1, 'John', 'Doe', 'john.doe@example.com', '2000-05-15', 1),
+(2, 'Jane', 'Smith', 'jane.smith@example.com', '2001-08-22', 2),
+(3, 'Alice', 'Johnson', 'alice.johnson@example.com', '1999-12-30', 3),
+(4, 'Bob', 'Brown', 'bob.brown@example.com', '2000-03-10', 4),
+(5, 'Charlie', 'Davis', 'charlie.davis@example.com', '2001-07-05', 5),
+(6, 'David', 'Wilson', 'david.wilson@example.com', '2000-09-12', 6),
+(7, 'Eva', 'Martinez', 'eva.martinez@example.com', '2001-02-18', 7),
+(8, 'Frank', 'Anderson', 'frank.anderson@example.com', '1999-11-25', 8),
+(9, 'Grace', 'Thomas', 'grace.thomas@example.com', '2000-04-30', 9),
+(10, 'Henry', 'Taylor', 'henry.taylor@example.com', '2001-06-14', 10),
+(11, 'Ivy', 'Moore', 'ivy.moore@example.com', '2000-10-05', 11),
+(12, 'Jack', 'Jackson', 'jack.jackson@example.com', '2001-01-20', 12),
+(13, 'Karen', 'White', 'karen.white@example.com', '1999-07-15', 13),
+(14, 'Leo', 'Harris', 'leo.harris@example.com', '2000-12-01', 14),
+(15, 'Mia', 'Clark', 'mia.clark@example.com', '2001-03-25', 15),
+(16, 'Noah', 'Lewis', 'noah.lewis@example.com', '2000-06-10', 16),
+(17, 'Olivia', 'Young', 'olivia.young@example.com', '2001-09-05', 17),
+(18, 'Peter', 'Hall', 'peter.hall@example.com', '1999-04-12', 18),
+(19, 'Quinn', 'Allen', 'quinn.allen@example.com', '2000-08-20', 19),
+(20, 'Rachel', 'King', 'rachel.king@example.com', '2001-11-15', 20),
+(21, 'Sam', 'Wright', 'sam.wright@example.com', '2000-02-28', 21),
+(22, 'Tina', 'Scott', 'tina.scott@example.com', '2001-05-10', 22),
+(23, 'Uma', 'Green', 'uma.green@example.com', '1999-10-22', 23),
+(24, 'Victor', 'Adams', 'victor.adams@example.com', '2000-01-15', 24),
+(25, 'Wendy', 'Baker', 'wendy.baker@example.com', '2001-04-30', 25),
+(26, 'Xander', 'Gonzalez', 'xander.gonzalez@example.com', '2000-07-12', 26),
+(27, 'Yara', 'Nelson', 'yara.nelson@example.com', '2001-10-05', 27),
+(28, 'Zack', 'Carter', 'zack.carter@example.com', '1999-03-18', 28),
+(29, 'Amy', 'Perez', 'amy.perez@example.com', '2000-06-22', 29),
+(30, 'Ben', 'Roberts', 'ben.roberts@example.com', '2001-09-15', 30),
+(31, 'Cara', 'Turner', 'cara.turner@example.com', '2000-12-10', 31),
+(32, 'Duke', 'Phillips', 'duke.phillips@example.com', '2001-02-25', 32),
+(33, 'Eve', 'Campbell', 'eve.campbell@example.com', '1999-05-30', 33),
+(34, 'Finn', 'Parker', 'finn.parker@example.com', '2000-08-15', 34),
+(35, 'Gina', 'Evans', 'gina.evans@example.com', '2001-11-10', 35),
+(36, 'Hank', 'Edwards', 'hank.edwards@example.com', '2000-03-05', 36),
+(37, 'Iris', 'Collins', 'iris.collins@example.com', '2001-06-20', 37),
+(38, 'Jake', 'Stewart', 'jake.stewart@example.com', '1999-09-12', 38),
+(39, 'Kara', 'Sanchez', 'kara.sanchez@example.com', '2000-12-25', 39),
+(40, 'Liam', 'Morris', 'liam.morris@example.com', '2001-04-10', 40);
+
+3. Departments
+
+INSERT INTO Departments (department_id, department_name) VALUES
+(1, 'Computer Science'),
+(2, 'Mathematics'),
+(3, 'Physics'),
+(4, 'History'),
+(5, 'English'),
+(6, 'Chemistry'),
+(7, 'Biology'),
+(8, 'Economics'),
+(9, 'Psychology'),
+(10, 'Sociology'),
+(11, 'Political Science'),
+(12, 'Art'),
+(13, 'Music'),
+(14, 'Philosophy'),
+(15, 'Engineering'),
+(16, 'Business'),
+(17, 'Nursing'),
+(18, 'Education'),
+(19, 'Law'),
+(20, 'Medicine'),
+(21, 'Architecture'),
+(22, 'Environmental Science'),
+(23, 'Anthropology'),
+(24, 'Communications'),
+(25, 'Theater'),
+(26, 'Dance'),
+(27, 'Religious Studies'),
+(28, 'Linguistics'),
+(29, 'Geography'),
+(30, 'Statistics'),
+(31, 'Astronomy'),
+(32, 'Geology'),
+(33, 'Agriculture'),
+(34, 'Veterinary Science'),
+(35, 'Public Health'),
+(36, 'Information Technology'),
+(37, 'Cybersecurity'),
+(38, 'Data Science'),
+(39, 'Artificial Intelligence'),
+(40, 'Robotics');
+
+4. Instructors
+
+INSERT INTO Instructors (instructor_id, first_name, last_name, email, department_id, address_id) VALUES
+(1, 'Michael', 'Scott', 'michael.scott@example.com', 1, 1),
+(2, 'Sarah', 'Connor', 'sarah.connor@example.com', 2, 2),
+(3, 'David', 'Smith', 'david.smith@example.com', 3, 3),
+(4, 'Laura', 'Brown', 'laura.brown@example.com', 4, 4),
+(5, 'Kevin', 'Johnson', 'kevin.johnson@example.com', 5, 5),
+(6, 'Emily', 'Davis', 'emily.davis@example.com', 6, 6),
+(7, 'James', 'Wilson', 'james.wilson@example.com', 7, 7),
+(8, 'Olivia', 'Martinez', 'olivia.martinez@example.com', 8, 8),
+(9, 'Daniel', 'Anderson', 'daniel.anderson@example.com', 9, 9),
+(10, 'Sophia', 'Thomas', 'sophia.thomas@example.com', 10, 10),
+(11, 'William', 'Taylor', 'william.taylor@example.com', 11, 11),
+(12, 'Ava', 'Moore', 'ava.moore@example.com', 12, 12),
+(13, 'Ethan', 'Jackson', 'ethan.jackson@example.com', 13, 13),
+(14, 'Mia', 'White', 'mia.white@example.com', 14, 14),
+(15, 'Alexander', 'Harris', 'alexander.harris@example.com', 15, 15),
+(16, 'Charlotte', 'Clark', 'charlotte.clark@example.com', 16, 16),
+(17, 'Benjamin', 'Lewis', 'benjamin.lewis@example.com', 17, 17),
+(18, 'Amelia', 'Young', 'amelia.young@example.com', 18, 18),
+(19, 'Lucas', 'Hall', 'lucas.hall@example.com', 19, 19),
+(20, 'Harper', 'Allen', 'harper.allen@example.com', 20, 20),
+(21, 'Mason', 'King', 'mason.king@example.com', 21, 21),
+(22, 'Evelyn', 'Wright', 'evelyn.wright@example.com', 22, 22),
+(23, 'Elijah', 'Scott', 'elijah.scott@example.com', 23, 23),
+(24, 'Abigail', 'Green', 'abigail.green@example.com', 24, 24),
+(25, 'Logan', 'Adams', 'logan.adams@example.com', 25, 25),
+(26, 'Ella', 'Baker', 'ella.baker@example.com', 26, 26),
+(27, 'Carter', 'Gonzalez', 'carter.gonzalez@example.com', 27, 27),
+(28, 'Scarlett', 'Nelson', 'scarlett.nelson@example.com', 28, 28),
+(29, 'Jackson', 'Carter', 'jackson.carter@example.com', 29, 29),
+(30, 'Lily', 'Perez', 'lily.perez@example.com', 30, 30),
+(31, 'Aiden', 'Roberts', 'aiden.roberts@example.com', 31, 31),
+(32, 'Chloe', 'Turner', 'chloe.turner@example.com', 32, 32),
+(33, 'Grayson', 'Phillips', 'grayson.phillips@example.com', 33, 33),
+(34, 'Zoey', 'Campbell', 'zoey.campbell@example.com', 34, 34),
+(35, 'Caleb', 'Parker', 'caleb.parker@example.com', 35, 35),
+(36, 'Penelope', 'Evans', 'penelope.evans@example.com', 36, 36),
+(37, 'Ryan', 'Edwards', 'ryan.edwards@example.com', 37, 37),
+(38, 'Addison', 'Collins', 'addison.collins@example.com', 38, 38),
+(39, 'Nathan', 'Stewart', 'nathan.stewart@example.com', 39, 39),
+(40, 'Hannah', 'Sanchez', 'hannah.sanchez@example.com', 40, 40);
+
+5. Courses
+
+INSERT INTO Courses (course_id, course_name, department_id, instructor_id, credits) VALUES
+(1, 'Introduction to Programming', 1, 1, 3),
+(2, 'Calculus I', 2, 2, 4),
+(3, 'Classical Mechanics', 3, 3, 3),
+(4, 'World History', 4, 4, 3),
+(5, 'English Literature', 5, 5, 3),
+(6, 'Organic Chemistry', 6, 6, 4),
+(7, 'Cell Biology', 7, 7, 3),
+(8, 'Microeconomics', 8, 8, 3),
+(9, 'Cognitive Psychology', 9, 9, 3),
+(10, 'Sociology of Culture', 10, 10, 3),
+(11, 'Political Theory', 11, 11, 3),
+(12, 'Art History', 12, 12, 3),
+(13, 'Music Theory', 13, 13, 3),
+(14, 'Ethics in Philosophy', 14, 14, 3),
+(15, 'Engineering Design', 15, 15, 4),
+(16, 'Business Management', 16, 16, 3),
+(17, 'Nursing Fundamentals', 17, 17, 4),
+(18, 'Educational Psychology', 18, 18, 3),
+(19, 'Constitutional Law', 19, 19, 3),
+(20, 'Medical Terminology', 20, 20, 3),
+(21, 'Architectural Design', 21, 21, 4),
+(22, 'Environmental Policy', 22, 22, 3),
+(23, 'Cultural Anthropology', 23, 23, 3),
+(24, 'Mass Communication', 24, 24, 3),
+(25, 'Theater Production', 25, 25, 3),
+(26, 'Dance Techniques', 26, 26, 3),
+(27, 'World Religions', 27, 27, 3),
+(28, 'Linguistics Basics', 28, 28, 3),
+(29, 'Geographic Information Systems', 29, 29, 4),
+(30, 'Statistical Methods', 30, 30, 3),
+(31, 'Astrophysics', 31, 31, 4),
+(32, 'Geology Fundamentals', 32, 32, 3),
+(33, 'Agricultural Science', 33, 33, 3),
+(34, 'Veterinary Anatomy', 34, 34, 4),
+(35, 'Public Health Policy', 35, 35, 3),
+(36, 'IT Infrastructure', 36, 36, 3),
+(37, 'Cybersecurity Basics', 37, 37, 3),
+(38, 'Data Analysis', 38, 38, 4),
+(39, 'AI Foundations', 39, 39, 3),
+(40, 'Robotics Engineering', 40, 40, 4);
+
+6. Prerequisites
+
+INSERT INTO Prerequisites (prerequisite_id, course_id, prerequisite_course_id) VALUES
+(1, 2, 1), -- Calculus I requires Introduction to Programming
+(2, 3, 2), -- Classical Mechanics requires Calculus I
+(3, 4, 3), -- World History requires Classical Mechanics
+(4, 5, 4), -- English Literature requires World History
+(5, 6, 5), -- Organic Chemistry requires English Literature
+(6, 7, 6), -- Cell Biology requires Organic Chemistry
+(7, 8, 7), -- Microeconomics requires Cell Biology
+(8, 9, 8), -- Cognitive Psychology requires Microeconomics
+(9, 10, 9), -- Sociology of Culture requires Cognitive Psychology
+(10, 11, 10), -- Political Theory requires Sociology of Culture
+(11, 12, 11), -- Art History requires Political Theory
+(12, 13, 12), -- Music Theory requires Art History
+(13, 14, 13), -- Ethics in Philosophy requires Music Theory
+(14, 15, 14), -- Engineering Design requires Ethics in Philosophy
+(15, 16, 15), -- Business Management requires Engineering Design
+(16, 17, 16), -- Nursing Fundamentals requires Business Management
+(17, 18, 17), -- Educational Psychology requires Nursing Fundamentals
+(18, 19, 18), -- Constitutional Law requires Educational Psychology
+(19, 20, 19), -- Medical Terminology requires Constitutional Law
+(20, 21, 20), -- Architectural Design requires Medical Terminology
+(21, 22, 21), -- Environmental Policy requires Architectural Design
+(22, 23, 22), -- Cultural Anthropology requires Environmental Policy
+(23, 24, 23), -- Mass Communication requires Cultural Anthropology
+(24, 25, 24), -- Theater Production requires Mass Communication
+(25, 26, 25), -- Dance Techniques requires Theater Production
+(26, 27, 26), -- World Religions requires Dance Techniques
+(27, 28, 27), -- Linguistics Basics requires World Religions
+(28, 29, 28), -- Geographic Information Systems requires Linguistics Basics
+(29, 30, 29), -- Statistical Methods requires Geographic Information Systems
+(30, 31, 30), -- Astrophysics requires Statistical Methods
+(31, 32, 31), -- Geology Fundamentals requires Astrophysics
+(32, 33, 32), -- Agricultural Science requires Geology Fundamentals
+(33, 34, 33), -- Veterinary Anatomy requires Agricultural Science
+(34, 35, 34), -- Public Health Policy requires Veterinary Anatomy
+(35, 36, 35), -- IT Infrastructure requires Public Health Policy
+(36, 37, 36), -- Cybersecurity Basics requires IT Infrastructure
+(37, 38, 37), -- Data Analysis requires Cybersecurity Basics
+(38, 39, 38), -- AI Foundations requires Data Analysis
+(39, 40, 39), -- Robotics Engineering requires AI Foundations
+(40, 40, 1); -- Robotics Engineering also requires Introduction to Programming
+
+7. Semesters
+
+INSERT INTO Semesters (semester_id, semester_name, start_date, end_date) VALUES
+(1, 'Fall 2023', '2023-09-01', '2023-12-15'),
+(2, 'Spring 2024', '2024-01-15', '2024-05-15'),
+(3, 'Summer 2024', '2024-06-01', '2024-08-15'),
+(4, 'Fall 2024', '2024-09-01', '2024-12-15'),
+(5, 'Spring 2025', '2025-01-15', '2025-05-15'),
+(6, 'Summer 2025', '2025-06-01', '2025-08-15'),
+(7, 'Fall 2025', '2025-09-01', '2025-12-15'),
+(8, 'Spring 2026', '2026-01-15', '2026-05-15'),
+(9, 'Summer 2026', '2026-06-01', '2026-08-15'),
+(10, 'Fall 2026', '2026-09-01', '2026-12-15'),
+(11, 'Spring 2027', '2027-01-15', '2027-05-15'),
+(12, 'Summer 2027', '2027-06-01', '2027-08-15'),
+(13, 'Fall 2027', '2027-09-01', '2027-12-15'),
+(14, 'Spring 2028', '2028-01-15', '2028-05-15'),
+(15, 'Summer 2028', '2028-06-01', '2028-08-15'),
+(16, 'Fall 2028', '2028-09-01', '2028-12-15'),
+(17, 'Spring 2029', '2029-01-15', '2029-05-15'),
+(18, 'Summer 2029', '2029-06-01', '2029-08-15'),
+(19, 'Fall 2029', '2029-09-01', '2029-12-15'),
+(20, 'Spring 2030', '2030-01-15', '2030-05-15'),
+(21, 'Summer 2030', '2030-06-01', '2030-08-15'),
+(22, 'Fall 2030', '2030-09-01', '2030-12-15'),
+(23, 'Spring 2031', '2031-01-15', '2031-05-15'),
+(24, 'Summer 2031', '2031-06-01', '2031-08-15'),
+(25, 'Fall 2031', '2031-09-01', '2031-12-15'),
+(26, 'Spring 2032', '2032-01-15', '2032-05-15'),
+(27, 'Summer 2032', '2032-06-01', '2032-08-15'),
+(28, 'Fall 2032', '2032-09-01', '2032-12-15'),
+(29, 'Spring 2033', '2033-01-15', '2033-05-15'),
+(30, 'Summer 2033', '2033-06-01', '2033-08-15'),
+(31, 'Fall 2033', '2033-09-01', '2033-12-15'),
+(32, 'Spring 2034', '2034-01-15', '2034-05-15'),
+(33, 'Summer 2034', '2034-06-01', '2034-08-15'),
+(34, 'Fall 2034', '2034-09-01', '2034-12-15'),
+(35, 'Spring 2035', '2035-01-15', '2035-05-15'),
+(36, 'Summer 2035', '2035-06-01', '2035-08-15'),
+(37, 'Fall 2035', '2035-09-01', '2035-12-15'),
+(38, 'Spring 2036', '2036-01-15', '2036-05-15'),
+(39, 'Summer 2036', '2036-06-01', '2036-08-15'),
+(40, 'Fall 2036', '2036-09-01', '2036-12-15');
+
+8. Course_Semesters
+
+INSERT INTO Course_Semesters (course_semester_id, course_id, semester_id) VALUES
+(1, 1, 1), -- Introduction to Programming in Fall 2023
+(2, 2, 1), -- Calculus I in Fall 2023
+(3, 3, 2), -- Classical Mechanics in Spring 2024
+(4, 4, 2), -- World History in Spring 2024
+(5, 5, 3), -- English Literature in Summer 2024
+(6, 6, 4), -- Organic Chemistry in Fall 2024
+(7, 7, 5), -- Cell Biology in Spring 2025
+(8, 8, 6), -- Microeconomics in Summer 2025
+(9, 9, 7), -- Cognitive Psychology in Fall 2025
+(10, 10, 8), -- Sociology of Culture in Spring 2026
+(11, 11, 9), -- Political Theory in Summer 2026
+(12, 12, 10), -- Art History in Fall 2026
+(13, 13, 11), -- Music Theory in Spring 2027
+(14, 14, 12), -- Ethics in Philosophy in Summer 2027
+(15, 15, 13), -- Engineering Design in Fall 2027
+(16, 16, 14), -- Business Management in Spring 2028
+(17, 17, 15), -- Nursing Fundamentals in Summer 2028
+(18, 18, 16), -- Educational Psychology in Fall 2028
+(19, 19, 17), -- Constitutional Law in Spring 2029
+(20, 20, 18), -- Medical Terminology in Summer 2029
+(21, 21, 19), -- Architectural Design in Fall 2029
+(22, 22, 20), -- Environmental Policy in Spring 2030
+(23, 23, 21), -- Cultural Anthropology in Summer 2030
+(24, 24, 22), -- Mass Communication in Fall 2030
+(25, 25, 23), -- Theater Production in Spring 2031
+(26, 26, 24), -- Dance Techniques in Summer 2031
+(27, 27, 25), -- World Religions in Fall 2031
+(28, 28, 26), -- Linguistics Basics in Spring 2032
+(29, 29, 27), -- Geographic Information Systems in Summer 2032
+(30, 30, 28), -- Statistical Methods in Fall 2032
+(31, 31, 29), -- Astrophysics in Spring 2033
+(32, 32, 30), -- Geology Fundamentals in Summer 2033
+(33, 33, 31), -- Agricultural Science in Fall 2033
+(34, 34, 32), -- Veterinary Anatomy in Spring 2034
+(35, 35, 33), -- Public Health Policy in Summer 2034
+(36, 36, 34), -- IT Infrastructure in Fall 2034
+(37, 37, 35), -- Cybersecurity Basics in Spring 2035
+(38, 38, 36), -- Data Analysis in Summer 2035
+(39, 39, 37), -- AI Foundations in Fall 2035
+(40, 40, 38); -- Robotics Engineering in Spring 2036
+
+9. Enrollments
+
+INSERT INTO Enrollments (enrollment_id, student_id, course_id, enrollment_date) VALUES
+(1, 1, 1, '2023-08-25'), -- John Doe enrolled in Introduction to Programming
+(2, 2, 2, '2023-08-26'), -- Jane Smith enrolled in Calculus I
+(3, 3, 3, '2024-01-10'), -- Alice Johnson enrolled in Classical Mechanics
+(4, 4, 4, '2024-01-11'), -- Bob Brown enrolled in World History
+(5, 5, 5, '2024-05-20'), -- Charlie Davis enrolled in English Literature
+(6, 6, 6, '2024-08-25'), -- David Wilson enrolled in Organic Chemistry
+(7, 7, 7, '2025-01-10'), -- Eva Martinez enrolled in Cell Biology
+(8, 8, 8, '2025-05-20'), -- Frank Anderson enrolled in Microeconomics
+(9, 9, 9, '2025-08-25'), -- Grace Thomas enrolled in Cognitive Psychology
+(10, 10, 10, '2026-01-10'), -- Henry Taylor enrolled in Sociology of Culture
+(11, 11, 11, '2026-05-20'), -- Ivy Moore enrolled in Political Theory
+(12, 12, 12, '2026-08-25'), -- Jack Jackson enrolled in Art History
+(13, 13, 13, '2027-01-10'), -- Karen White enrolled in Music Theory
+(14, 14, 14, '2027-05-20'), -- Leo Harris enrolled in Ethics in Philosophy
+(15, 15, 15, '2027-08-25'), -- Mia Clark enrolled in Engineering Design
+(16, 16, 16, '2028-01-10'), -- Noah Lewis enrolled in Business Management
+(17, 17, 17, '2028-05-20'), -- Olivia Young enrolled in Nursing Fundamentals
+(18, 18, 18, '2028-08-25'), -- Peter Hall enrolled in Educational Psychology
+(19, 19, 19, '2029-01-10'), -- Quinn Allen enrolled in Constitutional Law
+(20, 20, 20, '2029-05-20'), -- Rachel King enrolled in Medical Terminology
+(21, 21, 21, '2029-08-25'), -- Sam Wright enrolled in Architectural Design
+(22, 22, 22, '2030-01-10'), -- Tina Scott enrolled in Environmental Policy
+(23, 23, 23, '2030-05-20'), -- Uma Green enrolled in Cultural Anthropology
+(24, 24, 24, '2030-08-25'), -- Victor Adams enrolled in Mass Communication
+(25, 25, 25, '2031-01-10'), -- Wendy Baker enrolled in Theater Production
+(26, 26, 26, '2031-05-20'), -- Xander Gonzalez enrolled in Dance Techniques
+(27, 27, 27, '2031-08-25'), -- Yara Nelson enrolled in World Religions
+(28, 28, 28, '2032-01-10'), -- Zack Carter enrolled in Linguistics Basics
+(29, 29, 29, '2032-05-20'), -- Amy Perez enrolled in Geographic Information Systems
+(30, 30, 30, '2032-08-25'), -- Ben Roberts enrolled in Statistical Methods
+(31, 31, 31, '2033-01-10'), -- Cara Turner enrolled in Astrophysics
+(32, 32, 32, '2033-05-20'), -- Duke Phillips enrolled in Geology Fundamentals
+(33, 33, 33, '2033-08-25'), -- Eve Campbell enrolled in Agricultural Science
+(34, 34, 34, '2034-01-10'), -- Finn Parker enrolled in Veterinary Anatomy
+(35, 35, 35, '2034-05-20'), -- Gina Evans enrolled in Public Health Policy
+(36, 36, 36, '2034-08-25'), -- Hank Edwards enrolled in IT Infrastructure
+(37, 37, 37, '2035-01-10'), -- Iris Collins enrolled in Cybersecurity Basics
+(38, 38, 38, '2035-05-20'), -- Jake Stewart enrolled in Data Analysis
+(39, 39, 39, '2035-08-25'), -- Kara Sanchez enrolled in AI Foundations
+(40, 40, 40, '2036-01-10'); -- Liam Morris enrolled in Robotics Engineering
+
+10. Grades
+
+INSERT INTO Grades (grade_id, enrollment_id, grade) VALUES
+(1, 1, 'A'), -- John Doe got an A in Introduction to Programming
+(2, 2, 'B'), -- Jane Smith got a B in Calculus I
+(3, 3, 'A'), -- Alice Johnson got an A in Classical Mechanics
+(4, 4, 'C'), -- Bob Brown got a C in World History
+(5, 5, 'B'), -- Charlie Davis got a B in English Literature
+(6, 6, 'A'), -- David Wilson got an A in Organic Chemistry
+(7, 7, 'B'), -- Eva Martinez got a B in Cell Biology
+(8, 8, 'C'), -- Frank Anderson got a C in Microeconomics
+(9, 9, 'A'), -- Grace Thomas got an A in Cognitive Psychology
+(10, 10, 'B'), -- Henry Taylor got a B in Sociology of Culture
+(11, 11, 'A'), -- Ivy Moore got an A in Political Theory
+(12, 12, 'C'), -- Jack Jackson got a C in Art History
+(13, 13, 'A'), -- Karen White got an A in Music Theory
+(14, 14, 'B'), -- Leo Harris got a B in Ethics in Philosophy
+(15, 15, 'A'), -- Mia Clark got an A in Engineering Design
+(16, 16, 'C'), -- Noah Lewis got a C in Business Management
+(17, 17, 'A'), -- Olivia Young got an A in Nursing Fundamentals
+(18, 18, 'B'), -- Peter Hall got a B in Educational Psychology
+(19, 19, 'A'), -- Quinn Allen got an A in Constitutional Law
+(20, 20, 'C'), -- Rachel King got a C in Medical Terminology
+(21, 21, 'A'), -- Sam Wright got an A in Architectural Design
+(22, 22, 'B'), -- Tina Scott got a B in Environmental Policy
+(23, 23, 'A'), -- Uma Green got an A in Cultural Anthropology
+(24, 24, 'C'), -- Victor Adams got a C in Mass Communication
+(25, 25, 'A'), -- Wendy Baker got an A in Theater Production
+(26, 26, 'B'), -- Xander Gonzalez got a B in Dance Techniques
+(27, 27, 'A'), -- Yara Nelson got an A in World Religions
+(28, 28, 'C'), -- Zack Carter got a C in Linguistics Basics
+(29, 29, 'A'), -- Amy Perez got an A in Geographic Information Systems
+(30, 30, 'B'), -- Ben Roberts got a B in Statistical Methods
+(31, 31, 'A'), -- Cara Turner got an A in Astrophysics
+(32, 32, 'C'), -- Duke Phillips got a C in Geology Fundamentals
+(33, 33, 'A'), -- Eve Campbell got an A in Agricultural Science
+(34, 34, 'B'), -- Finn Parker got a B in Veterinary Anatomy
+(35, 35, 'A'), -- Gina Evans got an A in Public Health Policy
+(36, 36, 'C'), -- Hank Edwards got a C in IT Infrastructure
+(37, 37, 'A'), -- Iris Collins got an A in Cybersecurity Basics
+(38, 38, 'B'), -- Jake Stewart got a B in Data Analysis
+(39, 39, 'A'), -- Kara Sanchez got an A in AI Foundations
+(40, 40, 'C'); -- Liam Morris got a C in Robotics Engineering
