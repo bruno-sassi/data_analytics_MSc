@@ -1,16 +1,7 @@
 # %% [markdown]
-# ## Comprehensive Case Study – Recipe Review Ratings Prediction
+# # Comprehensive Case Study – Recipe Review Ratings Prediction
 #  
-# 
-# Deliver a structured analysis and a final report containing your findings, supported by data, visualizations, and code.
-# 
-# 1 - Data Clenaing
-# 2 - Exploratory Data Aalysis
-# 3 - Visualization
-# 4 - Feature Engineering
-# 5 - Model Building
-# 6 - Model Evaluation
-# 7 - Insights, Interpretation, and Reporting
+# #### Bruno de Arantes Leite Sassi
 
 # %% [markdown]
 # # 1 Data Cleaning:
@@ -22,10 +13,29 @@
 # 
 
 # %%
+pip install wordcloud
+
+# %%
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import re
+from collections import Counter
+from sklearn.feature_extraction.text import TfidfVectorizer
+from wordcloud import WordCloud
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LogisticRegression
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score
+from sklearn.ensemble import HistGradientBoostingClassifier
+from sklearn.compose import make_column_selector as selector
+from sklearn.impute import SimpleImputer
+
+
 df = pd.read_csv('recipe_reviews.csv')
 df.head()
 
@@ -54,8 +64,6 @@ print(df.select_dtypes(include="object").eq("2").sum())
 for i in df.select_dtypes(include=['object']).columns:
     print(f"\n Unique values in '{i}':")
     print(df[i].value_counts())
-
-
 
 # %% [markdown]
 # Looking into the data, the potential placeholders for missing data could be:
@@ -108,16 +116,16 @@ print(code_to_num.value_counts())
 # %%
 # drop recipe_number since it is redundant
 df = df.drop(columns=["recipe_number"])
-df
+df.head(3)
 
 # %% [markdown]
-# Upon a closer look, many columns act as IDs or indexes that cannot be generalized. Since the goal is to create a prediction model, those will be dropped to avoid unecessary or useless work.
+# Upon a closer look, many columns act as IDs or indexes that cannot be generalized, including 'recipe_code'. Since the goal is to create a prediction model, those will be dropped to avoid unecessary or useless work.
 
 # %%
 # Drop: IDs (recipe_code, user_index, user_id, created_at, comment_id, recipe_name, user_name).
 df = df.drop(columns=["recipe_code", "user_index", "user_id", "created_at", "comment_id", "user_name"])
-# creating date showed a small window of time, so it won't be useful for prediction
-df
+# converting created_at to date showed a small window of time, so it probably won't be useful for prediction too
+df.head(3)
 
 # %% [markdown]
 # # 2 Exploratory Data Analysis (EDA):
@@ -133,8 +141,6 @@ df.describe()
 
 # %%
 # Bag-of-words / TF-IDF on recipe_name
-from sklearn.feature_extraction.text import TfidfVectorizer
-
 vectorizer = TfidfVectorizer(
     max_features=500,  # keep top words only
     stop_words="english",
@@ -145,9 +151,6 @@ X_text = vectorizer.fit_transform(df["recipe_name"].fillna(""))
 
 # %%
 # Keyword analysis
-import pandas as pd
-from collections import Counter
-
 # simple token split
 words = df["recipe_name"].str.lower().str.split()
 word_counts = Counter([w for row in words.dropna() for w in row])
@@ -162,12 +165,6 @@ pd.Series(out).sort_values()
 
 
 # %%
-import numpy as np
-import pandas as pd
-import re
-from collections import Counter
-import matplotlib.pyplot as plt
-
 # --- basic tokenization (keep words & simple bigrams if you want) ---
 def tokenize(s):
     if pd.isna(s): return []
@@ -212,8 +209,6 @@ for i, col in enumerate(numerical_columns):
 plt.tight_layout()
 plt.show()
 
-
-
 # %% [markdown]
 # * likes_score — Mass near 0 with a long right tail → most items have low scores; a few get very large.
 # 
@@ -257,7 +252,6 @@ df.loc[df['stars'] == 0]
 # %%
 # percentage of 0 stars entries
 print(len(df.loc[df['stars'] == 0])/len(df)*100 )
-
 print( "Total entries x 0 stars entries: ", len(df), " x ", len(df.loc[df['stars'] == 0]) )
 
 # %% [markdown]
@@ -319,6 +313,7 @@ plt.show()
 # * **Exposure effect:** dislikes and dislike\_index also rise at high stars; not contradictory—popular items attract more interactions of all kinds.
 # * **Zero-inflation & heavy tails:** likes, user\_score, responses show many zeros and a few very large values → consider `log1p`/robust scaling and outlier-aware summaries.
 # * **Class imbalance risk:** low-star categories look sparser than 5-star.
+# * **text count** - users who leave bigger reviews tend to give higher stars 
 # 
 
 # %%
@@ -442,9 +437,8 @@ spearman_log_df.head(10)
 # * For relationships to pop out more, control for exposure will be needed (items with more visibility get more of everything).
 
 # %%
-import seaborn as sns
-import matplotlib.pyplot as plt
-
+# Visualize top features
+# pick top features by Spearman’s ρ
 top = spearman_df.head(6)["feature"].tolist()
 
 n = len(top); ncols = 3; nrows = (n + ncols - 1)//ncols
@@ -506,13 +500,6 @@ for col in cat_cols:
     plt.title(f"{col} vs stars")
     plt.xticks(rotation=45)
     plt.show()
-
-
-# %%
-pip install wordcloud
-
-# %%
-from wordcloud import WordCloud
 
 
 # %%
@@ -578,14 +565,9 @@ plt.show()
 
 
 # %% [markdown]
-# naming (or ingredients) linked to certain words may influence perception and ratings — with savory meat-related terms skewing lower, and pasta, vegetarian, and dessert-related terms skewing higher.
+# Naming (or ingredients) linked to certain words may influence perception and ratings — with savory meat-related terms skewing lower, and pasta, vegetarian, and dessert-related terms skewing higher.
 
 # %%
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import re
-
 # --- build presence matrix for top words ---
 def has_word(series, word):
     return series.str.lower().str.contains(rf"\b{re.escape(word)}\b", na=False)
@@ -620,7 +602,7 @@ mean_star = (dist * dist.columns.values).sum(axis=1)
 dist_sorted = dist.loc[mean_star.sort_values(ascending=False).index]
 
 # plot
-plt.figure(figsize=(10, 12))
+plt.figure(figsize=(8, 10))
 plt.imshow(dist_sorted.values, aspect="auto", cmap="viridis")
 plt.yticks(range(dist_sorted.shape[0]), dist_sorted.index)
 plt.xticks(range(dist_sorted.shape[1]), dist_sorted.columns)
@@ -636,15 +618,65 @@ plt.show()
 # The heatmap confirms a strong positive bias in ratings, with most words heavily skewed toward 4 and especially 5-star ratings. That suggests recipes generally receive high ratings regardless of wording. However, certain comfort-food or superlative terms (best, homemade, favorite) linked even more strongly to 5-star clusters, while some savory/neutral terms distribute slightly more evenly across 3–5 stars.
 
 # %% [markdown]
-# # 4 Feature Engineering:
-# Create or refine features to enhance model quality.
-# - 	Transform or derive features
-# - 	Encode categorical variables
-# - 	Normalize or scale features as appropriate
+# # 4 Feature Engineering
+# 
+# The goal here is to create a set of features that are simple but robust, aligned with the main patterns discovered during EDA:
+# 
+# - **Zero-inflated, skewed counts** (likes, dislikes, responses, user_score, ranking_score)  
+#   → apply log1p transforms and add binary presence flags.
+# 
+# - **Ratios and interactions** help normalize popularity/exposure bias.  
+#   → e.g., like ratio, total interactions.
+# 
+# - **Text-derived features** (basic word/char counts) to capture review length.  
+#   → complements TF-IDF embeddings.
+# 
+# - **Categorical encoding** for region/device/time-related variables.
+# 
+# This balances interpretability with predictive power.
 # 
 
 # %%
-df.info()
+# --- Feature Engineering ---
+df_fe = df.copy()
+
+# 1) Handle skewed / zero-inflated counts
+skewed_cols = ["likes", "dislikes", "responses", "user_score", "ranking_score"]
+for col in skewed_cols:
+    if col in df_fe.columns:
+        df_fe[f"log1p_{col}"] = np.log1p(df_fe[col].clip(lower=0))
+        df_fe[f"has_{col}"] = (df_fe[col] > 0).astype(int)
+
+# 2) Ratios and interactions
+if all(c in df_fe.columns for c in ["likes", "dislikes"]):
+    df_fe["like_ratio"] = df_fe["likes"] / (df_fe["likes"] + df_fe["dislikes"] + 1.0)
+
+if all(c in df_fe.columns for c in ["likes", "dislikes", "responses"]):
+    df_fe["total_interactions"] = (
+        df_fe["likes"].fillna(0) +
+        df_fe["dislikes"].fillna(0) +
+        df_fe["responses"].fillna(0)
+    )
+
+# 3) Text-derived stats
+if "text" in df_fe.columns:
+    df_fe["text_word_count"] = df_fe["text"].fillna("").apply(lambda x: len(x.split()))
+    df_fe["text_char_count"] = df_fe["text"].fillna("").apply(lambda x: len(x.replace(" ", "")))
+
+
+# Check result
+df_fe.head()
+
+
+# %% [markdown]
+# ### Summary of Engineered Features
+# - **Log-transformed counts:** log1p_likes, log1p_dislikes, log1p_responses, log1p_user_score, log1p_ranking_score
+# - **Presence flags:** has_likes, has_dislikes, has_responses, has_user_score, has_ranking_score
+# - **Ratios:** like_ratio, total_interactions
+# - **Text stats:** text_word_count, text_char_count
+# 
+# These will be combined later with TF-IDF features (from recipe names) and categorical encodings in the modeling pipeline.
+# 
 
 # %% [markdown]
 # # 5 Model Building:
@@ -653,226 +685,663 @@ df.info()
 # - 	Perform a proper train-test split
 # - 	Apply appropriate preprocessing (e.g., scaling, encoding)
 # - 	Tune hyperparameters if needed
-# 
+# #### Multiclass Logistic Regression
 
 # %%
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
+# 1. Define target and features
+# --------------------------
+y = df_fe["stars"].astype(int)
+X = df_fe.drop(columns=["stars", "stars_cat"])  # drop target + duplicate
 
-# Use recipe names, fill NaNs
-names = df["recipe_name"].fillna("")
-y = df["stars"]
+# --------------------------
+# 2. Feature groups
+# --------------------------
+# categorical
+cat_cols = ["region", "device_type"]
 
-# Build pipeline
-pipe = Pipeline([
-    ("tfidf", TfidfVectorizer(
-        max_features=1000,   # top N words
-        stop_words="english",
-        ngram_range=(1,2)    # include unigrams+bigrams
-    )),
-    ("clf", LogisticRegression(
-        max_iter=1000,
-        multi_class="multinomial"
-    ))
+# numeric (all engineered numeric features except IDs/text)
+num_cols = [
+    "likes_score", "dislike_index", "response_level", "ranking_value", "vote_ratio", "score_log",
+    "user_score", "responses", "likes", "dislikes", "ranking_score",
+    "text_word_count", "text_char_count",
+    "log1p_likes", "has_likes",
+    "log1p_dislikes", "has_dislikes",
+    "log1p_responses", "has_responses",
+    "log1p_user_score", "has_user_score",
+    "log1p_ranking_score", "has_ranking_score",
+    "like_ratio", "total_interactions"
+]
+
+# text
+text_col = "recipe_name"
+
+# --------------------------
+# 3. Transformers
+# --------------------------
+# numeric pipeline: scale everything
+num_transformer = Pipeline(steps=[
+    ("scaler", StandardScaler())
 ])
 
-# Train/test split
-X_train, X_test, y_train, y_test = train_test_split(names, y, test_size=0.2, stratify=y, random_state=42)
+# categorical pipeline: one-hot encode
+cat_transformer = OneHotEncoder(handle_unknown="ignore")
 
-pipe.fit(X_train, y_train)
-print("Validation accuracy:", pipe.score(X_test, y_test))
-
-
-# %%
-import numpy as np
-
-tfidf = pipe.named_steps["tfidf"]
-clf = pipe.named_steps["clf"]
-
-feature_names = np.array(tfidf.get_feature_names_out())
-coefs = clf.coef_  # shape = (n_classes, n_features)
-
-# Example: top words for 5★
-top_idx = np.argsort(coefs[4])[-20:]
-print("Top 20 words for 5★:", feature_names[top_idx])
-
-
-# %% [markdown]
-# Step 4 — Integration with your full model
-# 
-# Use ColumnTransformer to combine:
-# 
-# TF-IDF features from recipe_name
-# 
-# Numeric engineered features (likes, dislikes, vote_ratio, etc.)
-# 
-# Categorical features (region, device_type)
-# 
-# So your pipeline can handle everything end-to-end.
-
-# %%
-# --- 0) Imports
-import numpy as np
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import OneHotEncoder, StandardScaler, FunctionTransformer
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.feature_extraction.text import TfidfVectorizer
-
-# --- 1) Define target and drop unrated
-df_model = df.loc[df["stars"].between(1, 5)].copy()
-
-# --- 2) Columns to DROP entirely (IDs / leakage / artifacts)
-drop_cols = [
-    "Unnamed: 0", "recipe_number", "recipe_code", "user_index",
-    "comment_id", "user_id", "user_name"
-]
-drop_cols = [c for c in drop_cols if c in df_model.columns]
-df_model = df_model.drop(columns=drop_cols)
-
-# --- 3) Feature groups
-# Categorical (low-cardinality you want to keep)
-cat_cols = [c for c in ["region", "device_type"] if c in df_model.columns]
-
-# Text feature (recipe_name). If you don't want text yet, set text_col = None
-text_col = "recipe_name" if "recipe_name" in df_model.columns else None
-
-# Base numeric candidates (exclude target and non-numerics)
-num_cols = df_model.select_dtypes(include=np.number).columns.drop("stars").tolist()
-
-# Heavily skewed count-like features -> log1p transform
-skewed = [c for c in ["likes", "dislikes", "responses", "user_score", "ranking_score"]
-          if c in df_model.columns]
-
-# Keep only those skewed cols that are actually present
-skewed = [c for c in skewed if c in num_cols]
-
-# Other numeric features = remaining numerics minus skewed
-other_num = [c for c in num_cols if c not in skewed]
-
-# --- 4) Simple feature engineering (exposure & ratios)
-# total interactions
-if all(c in df_model.columns for c in ["likes", "dislikes", "responses"]):
-    df_model["total_interactions"] = (
-        df_model["likes"].fillna(0) + df_model["dislikes"].fillna(0) + df_model["responses"].fillna(0)
-    )
-    if "total_interactions" not in other_num:
-        other_num.append("total_interactions")
-
-# safe like ratio (if not already provided as vote_ratio)
-if "vote_ratio" not in df_model.columns and all(c in df_model.columns for c in ["likes", "dislikes"]):
-    df_model["vote_ratio"] = df_model["likes"] / (df_model["likes"] + df_model["dislikes"] + 1.0)
-    if "vote_ratio" not in other_num:
-        other_num.append("vote_ratio")
-elif "vote_ratio" in df_model.columns and "vote_ratio" not in other_num:
-    other_num.append("vote_ratio")
-
-# Time features (optional): from created_at if present & already converted to datetime
-if "created_at" in df_model.columns and np.issubdtype(df_model["created_at"].dtype, np.datetime64):
-    df_model["dow"] = df_model["created_at"].dt.dayofweek
-    df_model["hour"] = df_model["created_at"].dt.hour
-    df_model["month"] = df_model["created_at"].dt.month
-    # treat as categorical (low cardinality)
-    for c in ["dow", "hour", "month"]:
-        if c not in cat_cols:
-            cat_cols.append(c)
-
-# --- 5) X / y
-y = df_model["stars"].astype(int)
-X = df_model.drop(columns=["stars"])
-
-# --- 6) Transformers
-# 6a) Numeric: log1p for skewed, scale others
-log1p_tf = FunctionTransformer(lambda x: np.log1p(np.clip(x, a_min=0, a_max=None)), validate=False)
-
-num_pipeline = ColumnTransformer(
-    transformers=[
-        ("log_skewed", Pipeline([("log1p", log1p_tf), ("scaler", StandardScaler())]), skewed) if skewed else ("passthrough", "passthrough", []),
-        ("other_num", Pipeline([("scaler", StandardScaler())]), other_num) if other_num else ("passthrough2", "passthrough", [])
-    ],
-    remainder="drop"
-)
-
-# 6b) Categorical: one-hot
-cat_encoder = OneHotEncoder(handle_unknown="ignore", sparse_output=True)
-
-# 6c) Text: TF-IDF on recipe_name (optional)
-tfidf = TfidfVectorizer(
-    max_features=2000,       # adjust (e.g., 1k–10k)
+# text pipeline: TF-IDF
+text_transformer = TfidfVectorizer(
+    max_features=2000,
     stop_words="english",
-    ngram_range=(1, 2),      # unigrams + bigrams
-    min_df=5                 # drop very rare tokens
+    ngram_range=(1, 2),
+    min_df=5
 )
 
-# --- 7) ColumnTransformer (combine all)
-transformers = []
-if skewed or other_num:
-    transformers.append(("num", num_pipeline, skewed + other_num))
-if cat_cols:
-    transformers.append(("cat", cat_encoder, cat_cols))
-if text_col is not None:
-    transformers.append(("txt", tfidf, text_col))
-
+# --------------------------
+# 4. ColumnTransformer
+# --------------------------
 preprocess = ColumnTransformer(
-    transformers=transformers,
-    remainder="drop",        # drop anything not listed above
-    sparse_threshold=0.3     # keep memory reasonable
+    transformers=[
+        ("num", num_transformer, num_cols),
+        ("cat", cat_transformer, cat_cols),
+        ("txt", text_transformer, text_col)
+    ],
+    remainder="drop",
+    sparse_threshold=0.3
 )
 
-# --- 8) Classifier (simple & strong baseline)
-# Multinomial logistic with class_weight to handle 5★ dominance
+# --------------------------
+# 5. Classifier
+# --------------------------
 clf = LogisticRegression(
     max_iter=2000,
     multi_class="multinomial",
-    class_weight="balanced",
-    n_jobs=None
+    class_weight="balanced"
 )
 
-# Full pipeline
-pipe = Pipeline([
+pipe = Pipeline(steps=[
     ("preprocess", preprocess),
     ("model", clf)
 ])
 
-# --- 9) Train/test split (stratified)
+# --------------------------
+# 6. Train/test split + fit
+# --------------------------
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, stratify=y, random_state=42
 )
 
-# --- 10) Fit & evaluate
 pipe.fit(X_train, y_train)
 
 print("Train accuracy:", pipe.score(X_train, y_train))
 print("Test  accuracy:", pipe.score(X_test, y_test))
-print("\nClassification report (test):\n", classification_report(y_test, pipe.predict(X_test)))
-print("\nConfusion matrix (test):\n", confusion_matrix(y_test, pipe.predict(X_test)))
+print("\nClassification report:\n", classification_report(y_test, pipe.predict(X_test)))
+print("\nConfusion matrix:\n", confusion_matrix(y_test, pipe.predict(X_test)))
 
 
 # %% [markdown]
-# 6 Model Evaluation: 
-# Evaluate how well your models perform.
-# - 	Use metrics such as accuracy, precision, recall, F1-score, AUC-ROC
-# - 	You can include confusion matrices and interpret results
-# - 	Discuss the effect of class imbalance and possible mitigation
-# - 	Compare model performance meaningfully
+# ### Results Commentary
+# 
+# **Overall performance.** Test accuracy is **38.6%**, with a **macro-F1 of 0.19**. This reflects the strong **class imbalance** and the model’s difficulty distinguishing minority classes (1–3★).
+# 
+# **Majority-class context.** The test set is heavily skewed toward **5★ (2,767 / 3,298 ≈ 84%)**. Because we used `class_weight="balanced"`, the classifier became **conservative** about predicting 5★ (high precision = **0.90**) but **low recall = 0.40**, which drags down accuracy.
+# 
+# **Minority classes.** 1–3★ have very **low precision/recall** (F1 ≤ 0.11). Given EDA showed small effect sizes and zero-inflated signals, there’s limited separability among these classes using current features.
+# 
+# **Confusion patterns.** Many true 5★ are predicted as 4★/3★/2★, and most 1–3★ scatter across 4★/5★. This suggests (a) **overlap** in feature distributions and (b) **exposure/popularity effects** dominating raw counts.
+# 
+# **Implication.** To improve: (1) simplify and de-duplicate features, (2) **leverage review text** (not just recipe name), and (3) revisit imbalance handling/thresholds. If the goal tolerates it, **ordinal or collapsed labels** (e.g., 1–2 = Low, 3–4 = Mid, 5 = High) can also stabilize performance.
+# 
+
+# %% [markdown]
+# #### Feature Selection / Sanity Check
+# * Keep a curated numeric set (ratios, log counts, flags, simple text length).
+# 
+# * Keep categoricals (region, device_type) with OHE.
+# 
+# * Keep TF-IDF on recipe_name only for this step (we’ll add full review text next).
+# 
+# * Still use Logistic Regression; keep class_weight="balanced" for apples-to-apples.
+
+# %%
+# ===== Curate features =====
+y = df_fe["stars"].astype(int)
+X = df_fe.drop(columns=["stars", "stars_cat"])  # drop target & duplicate
+
+cat_cols = ["region", "device_type"]
+
+# Keep small, meaningful numeric core (drop raw counts when log versions exist)
+num_cols = [
+    "vote_ratio", "like_ratio",
+    "total_interactions",
+    "text_word_count", "text_char_count",
+    "log1p_likes", "log1p_dislikes", "log1p_responses",
+    "log1p_user_score", "log1p_ranking_score",
+    "has_likes", "has_dislikes", "has_responses", "has_user_score", "has_ranking_score",
+    # optional: keep exactly ONE of these global popularity scores (not all)
+    "ranking_value"
+]
+num_cols = [c for c in num_cols if c in X.columns]
+
+text_name_col = "recipe_name"
+
+# ===== Transformers =====
+num_tf = Pipeline([("scaler", StandardScaler())])
+cat_tf = OneHotEncoder(handle_unknown="ignore")
+name_tfidf = TfidfVectorizer(max_features=2000, stop_words="english",
+                             ngram_range=(1,2), min_df=5)
+
+preprocess = ColumnTransformer(
+    transformers=[
+        ("num", num_tf, num_cols),
+        ("cat", cat_tf, cat_cols),
+        ("name", name_tfidf, text_name_col),
+    ],
+    remainder="drop",
+    sparse_threshold=0.3
+)
+
+clf = LogisticRegression(max_iter=2000, multi_class="multinomial", class_weight="balanced")
+
+pipe = Pipeline([("preprocess", preprocess), ("model", clf)])
+
+# ===== Train / Evaluate =====
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.20, stratify=y, random_state=42
+)
+
+pipe.fit(X_train, y_train)
+print("Train accuracy:", pipe.score(X_train, y_train))
+print("Test  accuracy:", pipe.score(X_test, y_test))
+print("\nClassification report:\n", classification_report(y_test, pipe.predict(X_test)))
+print("\nConfusion matrix:\n", confusion_matrix(y_test, pipe.predict(X_test)))
+
+
+# %% [markdown]
+# #### Full Review Text
+# 
+
+# %%
+# ===== Add review text =====
+text_body_col = "text"  # 2 missing, TF-IDF will handle empty strings via fillna
+
+# Rebuild the ColumnTransformer with TWO text branches
+preprocess_2 = ColumnTransformer(
+    transformers=[
+        ("num", num_tf, num_cols),
+        ("cat", cat_tf, cat_cols),
+        ("name", TfidfVectorizer(max_features=2000, stop_words="english",
+                                 ngram_range=(1,2), min_df=5), text_name_col),
+        ("body", TfidfVectorizer(max_features=5000, stop_words="english",
+                                 ngram_range=(1,2), min_df=5), text_body_col),
+    ],
+    remainder="drop",
+    sparse_threshold=0.3
+)
+
+pipe_2 = Pipeline([("preprocess", preprocess_2),
+                   ("model", LogisticRegression(max_iter=2000,
+                                                multi_class="multinomial",
+                                                class_weight="balanced"))])
+
+X2 = X.copy()
+X2[text_body_col] = X2[text_body_col].fillna("")
+
+X_tr, X_te, y_tr, y_te = train_test_split(
+    X2, y, test_size=0.20, stratify=y, random_state=42
+)
+
+pipe_2.fit(X_tr, y_tr)
+print("Test accuracy (with review text):", pipe_2.score(X_te, y_te))
+print("\nClassification report:\n", classification_report(y_te, pipe_2.predict(X_te)))
+print("\nConfusion matrix:\n", confusion_matrix(y_te, pipe_2.predict(X_te)))
+
+
+# %% [markdown]
+# #### Imbalance Handling Toggle
+# Compare with vs. without balanced weights after adding review text
+
+# %%
+# A) Balanced (current)
+pipe_bal = pipe_2
+print("Balanced test accuracy:", pipe_bal.score(X_te, y_te))
+
+# B) Unbalanced (let majority dominate a bit more)
+pipe_unbal = Pipeline([("preprocess", preprocess_2),
+                       ("model", LogisticRegression(max_iter=2000,
+                                                    multi_class="multinomial",
+                                                    class_weight=None))])
+pipe_unbal.fit(X_tr, y_tr)
+print("Unbalanced test accuracy:", pipe_unbal.score(X_te, y_te))
+
+# Compare macro-F1 for fairness to minority classes
+from sklearn.metrics import f1_score
+pred_bal = pipe_bal.predict(X_te)
+pred_unbal = pipe_unbal.predict(X_te)
+print("Macro-F1 (balanced):  ", f1_score(y_te, pred_bal, average="macro"))
+print("Macro-F1 (unbalanced):", f1_score(y_te, pred_unbal, average="macro"))
+
+
+# %% [markdown]
+# #### Collapsed Labels
+# Ordinal-ish buckets: Low (1–2), Mid (3–4), High (5)
+
+# %%
+# ===== 3-class classification =====
+# buckets: 1-2★, 3-4★, 5★
+def bucketize(s):
+    return np.select([s<=2, (s>=3)&(s<=4), s==5], [0,1,2]).astype(int)
+
+y_3 = bucketize(y)
+
+X3_tr, X3_te, y3_tr, y3_te = train_test_split(X2, y_3, test_size=0.2, stratify=y_3, random_state=42)
+
+pipe_3 = Pipeline([("preprocess", preprocess_2),
+                   ("model", LogisticRegression(max_iter=2000, multi_class="multinomial", class_weight="balanced"))])
+pipe_3.fit(X3_tr, y3_tr)
+
+print("3-class accuracy:", pipe_3.score(X3_te, y3_te))
+print("\nClassification report:\n", classification_report(y3_te, pipe_3.predict(X3_te)))
+print("\nConfusion matrix:\n", confusion_matrix(y3_te, pipe_3.predict(X3_te)))
+
+
+# %% [markdown]
+# #### Tree Benchmark (no text)
+# Gradient Boosting on numeric + OHE categorical
+
+# %%
+# numeric+cat only
+num_cols_tree = num_cols
+cat_cols_tree = cat_cols
+
+pre_tree = ColumnTransformer(
+    transformers=[
+        ("num", Pipeline([("imp", SimpleImputer(strategy="median")), ("scaler", StandardScaler())]), num_cols_tree),
+        ("cat", Pipeline([("imp", SimpleImputer(strategy="most_frequent")),
+                          ("ohe", OneHotEncoder(handle_unknown="ignore"))]), cat_cols_tree),
+    ],
+    remainder="drop"
+)
+
+tree = Pipeline([("pre", pre_tree),
+                 ("clf", HistGradientBoostingClassifier(random_state=42))])
+
+Xt_tr, Xt_te, yt_tr, yt_te = train_test_split(
+    df_fe[num_cols_tree + cat_cols_tree], y, test_size=0.2, stratify=y, random_state=42
+)
+
+tree.fit(Xt_tr, yt_tr)
+print("Tree (no-text) accuracy:", tree.score(Xt_te, yt_te))
+print("\nClassification report:\n", classification_report(yt_te, tree.predict(Xt_te)))
+print("\nConfusion matrix:\n", confusion_matrix(yt_te, tree.predict(Xt_te)))
+
+
+# %%
+
+
+# %% [markdown]
+# # 6 Model Evaluation
+# 
+# This section evaluates the predictive performance of different models and feature sets.  
+# We proceed step by step, starting with a simple logistic regression and progressively adding features or reframing the target variable.
+# 
+# ---
+# 
+# ### Step 1 – Logistic Regression (Numeric + Recipe Name)
+# 
+# - **Test Accuracy:** 0.39  
+# - **Macro-F1:** 0.19  
+# - **Observation:** Performance on minority classes (1–3★) is very weak, with recall below 0.20.  
+# - Confusion matrix shows most cases collapsed into 5★ predictions.  
+# - Numeric features and recipe name alone do not provide enough discriminative power.
+# 
+# ---
+# 
+# ### Step 2 – Logistic Regression + Review Text (TF-IDF)
+# 
+# - **Test Accuracy:** 0.72  
+# - **Macro-F1:** 0.40  
+# - **Observation:** Adding the full review body as TF-IDF features substantially improves performance.  
+# - Minority classes (1–4★) gain recall, while precision on 5★ remains very high (0.95).  
+# - This highlights the strong predictive signal in textual content.
+# 
+# ---
+# 
+# ### Step 3 – Balanced vs. Unbalanced Logistic Regression
+# 
+# - **Balanced Logistic Regression**  
+#   - Accuracy = 0.72  
+#   - Macro-F1 = 0.40  
+#   - Better fairness across all classes.  
+# 
+# - **Unbalanced Logistic Regression**  
+#   - Accuracy = 0.85  
+#   - Macro-F1 = 0.34  
+#   - Inflated accuracy due to majority-class bias (predicts 5★ most of the time).  
+# 
+# - **Conclusion:** Balanced class weights are essential to avoid “fake” accuracy that ignores minority classes.
+# 
+# ---
+# 
+# ### Step 4 – Ordinal Buckets (Low = 1–2, Mid = 3–4, High = 5)
+# 
+# - **Test Accuracy:** 0.77  
+# - **Macro-F1:** 0.58  
+# - **Observation:** Collapsing into three categories yields a more robust model.  
+# - Recall improves for Low (0.57) and Mid (0.54) classes, while High (5★) remains strong.  
+# - This framing reduces noise and imbalance, and is recommended when fine-grained prediction is not critical.
+# 
+# ---
+# 
+# ### Step 5 – Gradient Boosting (Numeric + Categorical only, no text)
+# 
+# - **Test Accuracy:** 0.84  
+# - **Macro-F1:** 0.27  
+# - **Observation:** Despite high accuracy, the model predicts 5★ almost exclusively.  
+# - Minority classes are ignored (recall ≈ 0 for 4★ and below).  
+# - Confirms that **review text is indispensable** for balanced star prediction.
+# 
+# 
+
+# %% [markdown]
+# ### 6.1 Evaluation Plots
+# 
+# The figures below summarize performance for:
+# - **Balanced Logistic Regression (5-class)** using TF-IDF on `recipe_name` + `text` + engineered numeric + OHE categorical.
+# - **Balanced Logistic Regression (3-class ordinal buckets)** where 0=Low (1–2★), 1=Mid (3–4★), 2=High (5★).
+# 
+# We include:
+# 1) Confusion matrices  
+# 2) Bar charts for precision / recall / F1 by class
+# 
+
+# %%
+# --- Helpers (Matplotlib-only, one chart per figure) ---
+
+def plot_confusion_matrix(y_true, y_pred, title="Confusion Matrix", class_names=None):
+    cm = confusion_matrix(y_true, y_pred)
+    if class_names is None:
+        labels = np.unique(np.concatenate([y_true, y_pred]))
+        class_names = [str(c) for c in labels]
+    plt.figure(figsize=(6,5))
+    plt.imshow(cm, aspect="auto")
+    plt.title(title)
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
+    plt.xticks(ticks=np.arange(len(class_names)), labels=class_names, rotation=0)
+    plt.yticks(ticks=np.arange(len(class_names)), labels=class_names)
+    # overlay counts
+    for i in range(cm.shape[0]):
+        for j in range(cm.shape[1]):
+            plt.text(j, i, str(cm[i, j]), ha="center", va="center")
+    plt.colorbar()
+    plt.tight_layout()
+    plt.show()
+
+def plot_class_report_bars(y_true, y_pred, title_prefix=""):
+    report = classification_report(y_true, y_pred, output_dict=True, zero_division=0)
+    # collect per-class rows only (ignore 'accuracy', 'macro avg', 'weighted avg')
+    class_keys = [k for k in report.keys() if k.isdigit()]
+    class_keys_sorted = sorted(class_keys, key=lambda x: int(x))
+    metrics = ["precision", "recall", "f1-score"]
+    for m in metrics:
+        vals = [report[k][m] for k in class_keys_sorted]
+        plt.figure(figsize=(6,4))
+        x = np.arange(len(class_keys_sorted))
+        plt.bar(x, vals)
+        plt.title(f"{title_prefix}{m.capitalize()} by Class")
+        plt.xticks(ticks=x, labels=class_keys_sorted)
+        plt.ylim(0, 1)
+        plt.ylabel(m.capitalize())
+        plt.tight_layout()
+        plt.show()
+
+
+# %%
+# --- 5-class (Balanced Logistic Regression + text) ---
+
+# Assumes you already built pipe_2 (balanced) and X2, y from prior steps:
+#   - preprocess_2 includes numeric + OHE + TF-IDF(name) + TF-IDF(text)
+#   - pipe_2 = Pipeline([("preprocess", preprocess_2), ("model", LogisticRegression(..., class_weight="balanced"))])
+#   - X2["text"] already filled with "" for NaNs, y = df_fe["stars"].astype(int)
+
+from sklearn.model_selection import train_test_split
+
+X_tr, X_te, y_tr, y_te = train_test_split(
+    X2, y, test_size=0.20, stratify=y, random_state=42
+)
+
+# Fit (or reuse your fitted pipe_2)
+pipe_2.fit(X_tr, y_tr)
+pred5 = pipe_2.predict(X_te)
+
+# Plots
+plot_confusion_matrix(y_te, pred5, title="5-Class Confusion Matrix (Balanced Logistic + Text)", 
+                      class_names=[str(c) for c in sorted(np.unique(y_te))])
+plot_class_report_bars(y_te, pred5, title_prefix="5-Class ")
+
+
+# %%
+# --- 3-class ordinal (Balanced Logistic Regression + text) ---
+
+import numpy as np
+
+def bucketize(s):
+    return np.select([s<=2, (s>=3)&(s<=4), s==5], [0,1,2]).astype(int)
+
+y_3 = bucketize(y)
+
+X3_tr, X3_te, y3_tr, y3_te = train_test_split(
+    X2, y_3, test_size=0.20, stratify=y_3, random_state=42
+)
+
+pipe_3 = Pipeline([
+    ("preprocess", preprocess_2),  # same features: numeric + OHE + name TF-IDF + text TF-IDF
+    ("model", LogisticRegression(max_iter=2000, multi_class="multinomial", class_weight="balanced"))
+])
+
+pipe_3.fit(X3_tr, y3_tr)
+pred3 = pipe_3.predict(X3_te)
+
+# Plots
+plot_confusion_matrix(y3_te, pred3, title="3-Class Confusion Matrix (Balanced Logistic + Text)", 
+                      class_names=["Low (1–2)", "Mid (3–4)", "High (5)"])
+
+# For the bars, sklearn's report will output classes as "0,1,2"
+plot_class_report_bars(y3_te, pred3, title_prefix="3-Class ")
+
+
+# %% [markdown]
+# - The **5-class confusion matrix** shows where minority classes (1–4★) still confuse with adjacent classes, while 5★ dominates but is no longer over-predicted (balanced weights).
+# - The **3-class matrix** should show cleaner separation, with “High (5★)” well recognized and improved recall for “Low” and “Mid.”
+# - The bar charts help spot which specific class needs attention (typically Low/Mid for precision, sometimes recall).
 # 
 
 # %%
 
 
 # %% [markdown]
-# 7 Insights, Interpretation, and Reporting: Communicate your findings clearly, professionally, and meaningfully.
-# - Include a summary outlining key findings and recommendations
-# - Clearly explain what factors most influence star ratings
-# - Highlight any patterns in user reputation, engagement, or other features
-# - Suggest improvements or potential applications (e.g., helping platforms understand review behavior)
-# - Reflect on limitations of your analysis and model
-# - Structure your report into logical, readable sections with explanations
+# # 7. Insights, Interpretation, and Reporting
 # 
+# ### Executive Summary
+# - **Text matters most.** Adding TF-IDF over the review body lifted test accuracy from ~0.39 to ~0.72 and macro-F1 from ~0.19 to ~0.40.
+# - **Fair > “fake” accuracy.** Unbalanced models inflate accuracy by predicting 5★; balanced logistic regression provides fairer performance across all classes.
+# - **Pragmatic framing helps.** Collapsing labels to **Low (1–2), Mid (3–4), High (5)** improves stability (accuracy ~0.77; macro-F1 ~0.58).
+# - **Numeric-only signals are weak.** Engagement counts are zero-inflated and exposure-driven; they help after log/ratio transforms but don’t replace text.
+# 
+# ---
+# 
+# ### Key Findings
+# 1. **Best simple model:** Balanced multinomial Logistic Regression with:
+#    - TF-IDF over **`text`** (review body) and **`recipe_name`**
+#    - One-hot **`region`**, **`device_type`**
+#    - Scaled numeric engineered features (log1p counts, presence flags, ratios)
+# 2. **Drivers of higher stars (qualitative):**
+#    - Higher **vote/like ratios** trend with higher ratings; **dislikes** inversely correlate.
+#    - Certain words/tones in names/text associate with higher/lower ratings (e.g., superlatives and comfort terms skew higher).
+# 3. **Engagement patterns & exposure:**
+#    - **likes, dislikes, responses, user_score** are **zero-inflated** with long tails.
+#    - **log1p** transforms and **presence flags** reduce skew; ratios (e.g., `like_ratio`) help normalize exposure.
+# 
+# ---
+# 
+# ### Recommendations
+# - **Deploy** the balanced LR + TF-IDF pipeline as the **baseline** for 5-class prediction and **also** report the 3-class (Low/Mid/High) variant for robust, operational summaries.
+# - **Monitor** both overall accuracy and **macro-F1** to avoid majority-class bias.
+# - **Add lightweight sentiment** (lexicon score or simple polarity) if you need a quick boost without heavy modeling.
+# - **Consider ordinal approaches** (ordinal logistic / thresholded probabilities) if exact 1–5 ordering is more important than class labels.
+# 
+# ---
+# 
+# ### Potential Applications
+# - **Quality Ops / CX:** Flag likely-low reviews for proactive follow-up; auto-route to support.
+# - **Creator guidance:** While users draft reviews/recipes, nudge phrasing and clarity associated with higher satisfaction.
+# - **Content refresh:** Prioritize recipes predicted as Mid/Low for improvements (instructions, photos, ingredient clarity).
+# 
+# ---
+# 
+# ### Limitations
+# - **Label imbalance:** Dataset is heavily skewed to 5★; minority classes (1–3★) have limited support.
+# - **Assumption on 0★:** Rows with `stars == 0` were treated as unrated and removed.
+# - **Exposure bias:** Engagement counts reflect popularity/visibility, not just quality.
+# - **Single split:** Results reported on one stratified split; k-fold CV would better quantify variance.
+# - **Style sensitivity:** Text models may learn stylistic correlates (tone/phrasing), not only true quality.
+# 
+# ---
+# 
+# ### Reproducibility Notes
+# - Stratified train/test split (80/20), fixed `random_state=42`.
+# - Logistic Regression: `multi_class="multinomial"`, `class_weight="balanced"`, `max_iter=2000`.
+# - TF-IDF: unigrams+bigrams, `min_df=5`; `max_features` ~2k (name) and ~5k (text).
+# - Numeric scaling via `StandardScaler`; categorical via `OneHotEncoder(handle_unknown="ignore")`.
+# 
+# ---
+# 
+# ### Appendix A — Engineered Features (one-liners)
+# - **`log1p_*`**: Log-scaled counts (`likes`, `dislikes`, `responses`, `user_score`, `ranking_score`) to tame long tails.
+# - **`has_*`**: Binary flags for presence (`>0`) of each count feature.
+# - **`like_ratio`**: `likes / (likes + dislikes + 1)`; normalizes by total votes.
+# - **`total_interactions`**: `likes + dislikes + responses`; proxy for exposure.
+# - **`text_word_count`, `text_char_count`**: Review length proxies.
+# - **Categoricals**: `region`, `device_type` (OHE).
+# - **Text**: TF-IDF on `recipe_name` and full review `text`.
+# 
+# ---
+# 
+# ### Appendix B — Best Baseline Pipeline (summary)
+# - **Preprocessing (ColumnTransformer):**
+#   - Numeric: scale engineered features (`StandardScaler`)
+#   - Categorical: OHE on `region`, `device_type`
+#   - Text: TF-IDF on `recipe_name` (2k feats) + `text` (5k feats), n-grams (1,2), `min_df=5`
+# - **Model:** Logistic Regression (multinomial, balanced)
+# - **Primary metrics:** Accuracy and **macro-F1** (report both 5-class and 3-class)
+# 
+
+# %%
+# === FINAL CELL — Baseline Refit & Compact Summary (5-class and 3-class) ===
+
+# 1) Define features & target
+# -----------------------------
+cat_cols = ["region", "device_type"]
+
+# Curated numeric core (simple but robust)
+num_cols = [
+    "vote_ratio", "like_ratio",
+    "total_interactions",
+    "text_word_count", "text_char_count",
+    "log1p_likes", "log1p_dislikes", "log1p_responses",
+    "log1p_user_score", "log1p_ranking_score",
+    "has_likes", "has_dislikes", "has_responses", "has_user_score", "has_ranking_score",
+    "ranking_value",  # keep one global popularity signal
+]
+num_cols = [c for c in num_cols if c in df_fe.columns]
+
+text_name = "recipe_name"
+text_body = "text"
+
+# Target
+y5 = df_fe["stars"].astype(int)
+
+# Feature frame
+use_cols = cat_cols + num_cols + [text_name, text_body]
+X = df_fe[use_cols].copy()
+X[text_body] = X[text_body].fillna("")
+X[text_name] = X[text_name].fillna("")
+
+# -----------------------------
+# 2) Preprocessing & model
+# -----------------------------
+num_tf = Pipeline([("scaler", StandardScaler())])
+cat_tf = OneHotEncoder(handle_unknown="ignore")
+
+preprocess = ColumnTransformer(
+    transformers=[
+        ("num", num_tf, num_cols),
+        ("cat", cat_tf, cat_cols),
+        ("name", TfidfVectorizer(max_features=2000, stop_words="english",
+                                 ngram_range=(1,2), min_df=5), text_name),
+        ("body", TfidfVectorizer(max_features=5000, stop_words="english",
+                                 ngram_range=(1,2), min_df=5), text_body),
+    ],
+    remainder="drop",
+    sparse_threshold=0.3,
+)
+
+clf_bal = LogisticRegression(
+    max_iter=2000,
+    multi_class="multinomial",
+    class_weight="balanced",
+)
+
+pipe5 = Pipeline([
+    ("preprocess", preprocess),
+    ("model", clf_bal),
+])
+
+# -----------------------------
+# 3) Train/test split & fit (5-class)
+# -----------------------------
+X5_tr, X5_te, y5_tr, y5_te = train_test_split(
+    X, y5, test_size=0.20, stratify=y5, random_state=42
+)
+pipe5.fit(X5_tr, y5_tr)
+y5_pred = pipe5.predict(X5_te)
+
+# -----------------------------
+# 4) 3-class (Low/Mid/High) setup
+# -----------------------------
+def bucketize(s):
+    # 0=Low (1–2), 1=Mid (3–4), 2=High (5)
+    return np.select([s<=2, (s>=3)&(s<=4), s==5], [0,1,2]).astype(int)
+
+y3 = bucketize(y5)
+X3_tr, X3_te, y3_tr, y3_te = train_test_split(
+    X, y3, test_size=0.20, stratify=y3, random_state=42
+)
+pipe3 = Pipeline([
+    ("preprocess", preprocess),
+    ("model", LogisticRegression(max_iter=2000, multi_class="multinomial", class_weight="balanced")),
+])
+pipe3.fit(X3_tr, y3_tr)
+y3_pred = pipe3.predict(X3_te)
+
+# -----------------------------
+# 5) Compact summary table
+# -----------------------------
+def summarize(y_true, y_pred):
+    return {
+        "accuracy": accuracy_score(y_true, y_pred),
+        "macro_f1": f1_score(y_true, y_pred, average="macro"),
+        "weighted_f1": f1_score(y_true, y_pred, average="weighted"),
+    }
+
+summary = pd.DataFrame([
+    {"setup": "5-class (balanced LR + TF-IDF)", **summarize(y5_te, y5_pred)},
+    {"setup": "3-class (Low/Mid/High; balanced LR + TF-IDF)", **summarize(y3_te, y3_pred)},
+]).round(3)
+
+print(summary.to_string(index=False))
+
+# Optional: quick reports (comment out if you want only the table)
+print("\n5-class classification report:\n", classification_report(y5_te, y5_pred))
+print("\n3-class classification report:\n", classification_report(y3_te, y3_pred))
+
 
 
